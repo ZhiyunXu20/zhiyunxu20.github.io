@@ -1,0 +1,23 @@
+Index: .gitignore
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.gitignore b/.gitignore
+--- a/.gitignore	(revision 72abb3f2a416b820a285001ad133d99a1242861e)
++++ b/.gitignore	(date 1714146015915)
+@@ -1,0 +1,14 @@
++# 忽略所有 .a 文件
++*.a
++
++# 忽略日志文件
++*.log
++
++# 忽略 macOS 系统生成的 .DS_Store 文件
++.DS_Store
++
++# 忽略 node_modules 文件夹
++node_modules/
++
++# 忽略构建输出目录
++/dist
