@@ -7,9 +7,9 @@
 
 # Site Settings
 locale                   : "en-US"
-title                    : "test"
+title                    : "Zhiyun Xu"
 title_separator          : "-"
-name                     : &name "test"
+name                     : &name "Zhiyun Xu"
 description              : &description #"Postdoc in Political Science"
 url                      : #"https://zhiyunxu20.github.io" # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
 baseurl                  : "" # the subpath of your site, e.g. "/blog"
@@ -109,7 +109,7 @@ author:
   impactstory      : #"https://profiles.impactstory.org/u/xxxx-xxxx-xxxx-xxxx"
   lastfm           :
   linkedin         :
-  mastodon         : "fosstodon.org/@jayrobw"
+  mastodon         : #"fosstodon.org/@jayrobw"
   pinterest        :
   soundcloud       :
   stackoverflow    : #"https://stackoverflow.com/users/10912314/?????"
