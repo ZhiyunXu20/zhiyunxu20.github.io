@@ -154,6 +154,17 @@ exclude:
   - package.json
   - tmp
   - vendor
+  # 不需要发布的开发/模板文件
+  - node_modules
+  - package-lock.json
+  - CONTRIBUTING.md
+  - CHANGELOG.md
+  - Website.Rproj
+  - markdown_generator
+  - data
+  - talkmap
+  - files/html/posts
+  - files/html/teaching-materials
 keep_files:
   - .git
   - .svn
@@ -184,13 +195,13 @@ kramdown:
 # Collections
 collections:
   publications:
-    output: true
+    output: false # 原模板内容，已隐藏；改为 true 即可重新发布
     permalink: /:collection/:path/
   research:
-    output: true
+    output: false # 原模板内容，已隐藏；改为 true 即可重新发布
     permalink: /:collection/:path/
   talks:
-    output: true
+    output: false # 原模板内容，已隐藏；改为 true 即可重新发布
     permalink: /:collection/:path/
 
 
@@ -201,6 +212,7 @@ defaults:
       path: ""
       type: posts
     values:
+      published: false # 原模板博客，已隐藏；删除此行即可重新发布
       layout: single
       author_profile: true
       read_time: true
