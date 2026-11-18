@@ -1,4 +1,5 @@
 ---
+published: false # 原模板页面，已隐藏；删除此行即可重新发布
 permalink: /terms/
 title: "Terms and Privacy Policy"
 modified: 2016-06-06
