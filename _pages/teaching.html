@@ -1,0 +1,13 @@
+---
+published: false # 示例页面，已隐藏；删除此行即可发布
+layout: archive
+title: "Teaching"
+permalink: /teaching/
+author_profile: true
+---
+
+{% include base_path %}
+
+{% for post in site.teaching reversed %}
+  {% include archive-single.html %}
+{% endfor %}

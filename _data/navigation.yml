@@ -1,20 +1,7 @@
-# main links links
-main:
-#  - title: "Publications"
-#    url: /publications/
-#
-#  - title: "Research"
-#    url: /research/
-#
-#  - title: "Teaching"
-#    url: /teaching/
-#
-#  - title: "Software"
-#    url: /software/
-#
-#  - title: "Posts"
-#    url: /posts/
+# 顶部导航栏。想显示隐藏的模块（如 Publications、Blog Posts），
+# 先在对应页面删掉 `published: false`，再把链接加到这里。
 
+main:
   - title: "Learn"
     url: /learn/
 
