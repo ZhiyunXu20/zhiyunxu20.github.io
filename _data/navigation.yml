@@ -5,5 +5,8 @@ main:
   - title: "Learn"
     url: /learn/
 
+  - title: "Training"
+    url: /training/
+
   - title: "CV"
     url: /cv/

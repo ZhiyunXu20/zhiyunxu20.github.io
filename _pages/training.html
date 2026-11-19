@@ -1,0 +1,176 @@
+---
+layout: single
+title: "Training"
+permalink: /training/
+author_profile: true
+---
+{% comment %}
+  培训经历页：数据来自 _data/trainings.yml（不在公开仓库里，构建时从私有仓库拉取，
+  本地预览用 scripts/sync-site-data.sh 同步）。hidden: true 的条目和 notes 字段不会输出。
+{% endcomment %}
+{% assign all = site.data.trainings | default: empty %}
+{% assign visible = all | where_exp: "t", "t.hidden != true" | sort: "start", "last" | reverse %}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
+
+<style>
+  .tr-intro { margin-bottom: 1em; }
+  .tr-map { height: 420px; border-radius: 8px; margin: 0 0 1.25em; border: 1px solid var(--global-border-color, #ddd); z-index: 0; }
+  .tr-filters { display: flex; flex-wrap: wrap; gap: .5em .75em; align-items: center; margin-bottom: 1em; font-size: .85em; }
+  .tr-filters .tr-group { display: flex; flex-wrap: wrap; gap: .4em; align-items: center; }
+  .tr-filters .tr-label { opacity: .7; margin-right: .2em; }
+  .tr-chip { border: 1px solid var(--global-border-color, #ccc); background: transparent; color: inherit; border-radius: 999px; padding: .2em .8em; cursor: pointer; font: inherit; }
+  .tr-chip[aria-pressed="true"] { background: var(--global-link-color, #2f7f93); border-color: var(--global-link-color, #2f7f93); color: #fff; }
+  .tr-count { margin-left: auto; opacity: .7; }
+  .tr-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1em; }
+  .tr-card { border: 1px solid var(--global-border-color, #ddd); border-radius: 8px; padding: .9em 1em; font-size: .85em; display: flex; flex-direction: column; gap: .35em; cursor: default; }
+  .tr-card.is-mapped { cursor: pointer; }
+  .tr-card.is-active { outline: 2px solid var(--global-link-color, #2f7f93); }
+  .tr-card h3 { font-size: 1.05em; margin: 0; line-height: 1.3; }
+  .tr-meta { opacity: .75; }
+  .tr-card ul { margin: .2em 0 0 1.1em; padding: 0; }
+  .tr-card li { margin: 0; }
+  .tr-tags { display: flex; flex-wrap: wrap; gap: .3em; margin-top: auto; padding-top: .4em; }
+  .tr-tag { font-size: .8em; border-radius: 4px; padding: .05em .5em; background: var(--global-border-color, #eee); }
+  .tr-tag.mode-online { background: #e7f0fb; color: #1d4f91; }
+  .tr-tag.mode-in-person { background: #e8f5ec; color: #1f6b3a; }
+  .tr-empty { opacity: .7; }
+  [hidden] { display: none !important; }
+</style>
+
+<p class="tr-intro">Schools, courses and research training I have taken part in. Click a card to find it on the map; use the tags to filter.</p>
+
+<div id="tr-map" class="tr-map" role="region" aria-label="Map of training locations"></div>
+
+<div class="tr-filters" id="tr-filters"></div>
+
+<div class="tr-cards" id="tr-cards">
+{% for t in visible %}
+  <article class="tr-card{% if t.lat and t.lng %} is-mapped{% endif %}" data-id="{{ t.id }}" data-tags="{{ t.tags | join: ',' }}" data-mode="{{ t.mode }}">
+    <h3>{% if t.url %}<a href="{{ t.url }}" target="_blank" rel="noopener">{{ t.title }}</a>{% else %}{{ t.title }}{% endif %}</h3>
+    <div><strong>{{ t.role }}</strong> · {{ t.org }}</div>
+    {% if t.unit %}<div class="tr-meta">{{ t.unit }}</div>{% endif %}
+    <div class="tr-meta">{{ t.date }}{% if t.city %} · {{ t.city }}{% endif %}{% if t.country and t.city != t.country %}{% if t.city %}, {% else %} · {% endif %}{{ t.country }}{% endif %}</div>
+    {% if t.details and t.details.size > 0 %}<ul>{% for d in t.details %}<li>{{ d }}</li>{% endfor %}</ul>{% endif %}
+    <div class="tr-tags">
+      {% if t.mode %}<span class="tr-tag mode-{{ t.mode }}">{{ t.mode }}</span>{% endif %}
+      {% for tag in t.tags %}<span class="tr-tag">{{ tag }}</span>{% endfor %}
+    </div>
+  </article>
+{% endfor %}
+</div>
+{% if visible.size == 0 %}<p class="tr-empty">No training data found. Add <code>_data/trainings.yml</code> (see <code>scripts/sync-site-data.sh</code>).</p>{% endif %}
+
+<script>
+  window.TRAININGS = [
+  {% for t in visible %}{% if t.lat and t.lng %}
+    {"id": {{ t.id | jsonify }}, "title": {{ t.title | jsonify }}, "org": {{ t.org | jsonify }}, "date": {{ t.date | jsonify }}, "city": {{ t.city | jsonify }}, "lat": {{ t.lat }}, "lng": {{ t.lng }}},
+  {% endif %}{% endfor %}
+  ];
+</script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<script>
+(function () {
+  var cards = Array.prototype.slice.call(document.querySelectorAll('.tr-card'));
+  var points = window.TRAININGS || [];
+  var map = null, cluster = null, markers = {};
+
+  // ---- map ----
+  if (window.L && points.length) {
+    map = L.map('tr-map', { scrollWheelZoom: false, worldCopyJump: true });
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      maxZoom: 18, subdomains: 'abcd',
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+    }).addTo(map);
+    cluster = L.markerClusterGroup({ showCoverageOnHover: false, maxClusterRadius: 40 });
+    points.forEach(function (p) {
+      var m = L.marker([p.lat, p.lng], { title: p.title });
+      var esc = function (s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; };
+      m.bindPopup('<strong>' + esc(p.title) + '</strong><br>' + esc(p.org) + '<br><span style="opacity:.7">' + esc(p.date) + (p.city ? ' · ' + esc(p.city) : '') + '</span>');
+      m.on('click', function () { highlight(p.id, false); });
+      markers[p.id] = m;
+    });
+    map.addLayer(cluster);
+  } else {
+    document.getElementById('tr-map').hidden = true;
+  }
+
+  function highlight(id, fly) {
+    cards.forEach(function (c) { c.classList.toggle('is-active', c.dataset.id === id); });
+    var card = document.querySelector('.tr-card[data-id="' + id + '"]');
+    if (!fly && card) card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    var m = markers[id];
+    if (fly && m && cluster) {
+      cluster.zoomToShowLayer(m, function () { m.openPopup(); });
+      document.getElementById('tr-map').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
+  cards.forEach(function (c) {
+    if (markers[c.dataset.id]) c.addEventListener('click', function (e) { if (e.target.tagName !== 'A') highlight(c.dataset.id, true); });
+  });
+
+  // ---- filters ----
+  var tags = {}, modes = {};
+  cards.forEach(function (c) {
+    (c.dataset.tags || '').split(',').filter(Boolean).forEach(function (t) { tags[t] = true; });
+    if (c.dataset.mode) modes[c.dataset.mode] = true;
+  });
+  var state = { tags: {}, mode: null };
+  var bar = document.getElementById('tr-filters');
+  function chip(label, pressed, onClick) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'tr-chip'; b.textContent = label;
+    b.setAttribute('aria-pressed', pressed ? 'true' : 'false');
+    b.addEventListener('click', function () { onClick(b); });
+    return b;
+  }
+  function group(label) {
+    var g = document.createElement('div'); g.className = 'tr-group';
+    var s = document.createElement('span'); s.className = 'tr-label'; s.textContent = label;
+    g.appendChild(s); bar.appendChild(g); return g;
+  }
+  var gTopic = group('Topic:');
+  Object.keys(tags).sort().forEach(function (t) {
+    gTopic.appendChild(chip(t, false, function (b) {
+      state.tags[t] = !state.tags[t]; b.setAttribute('aria-pressed', state.tags[t] ? 'true' : 'false'); apply();
+    }));
+  });
+  var gMode = group('Format:');
+  var modeButtons = [];
+  ['in-person', 'online'].filter(function (m) { return modes[m]; }).forEach(function (m) {
+    var b = chip(m, false, function () {
+      state.mode = state.mode === m ? null : m;
+      modeButtons.forEach(function (x) { x.setAttribute('aria-pressed', x.textContent === state.mode ? 'true' : 'false'); });
+      apply();
+    });
+    modeButtons.push(b); gMode.appendChild(b);
+  });
+  var count = document.createElement('span'); count.className = 'tr-count'; bar.appendChild(count);
+
+  function apply() {
+    var active = Object.keys(state.tags).filter(function (t) { return state.tags[t]; });
+    var shown = 0;
+    if (cluster) cluster.clearLayers();
+    var bounds = [];
+    cards.forEach(function (c) {
+      var ct = (c.dataset.tags || '').split(',');
+      var ok = active.every(function (t) { return ct.indexOf(t) !== -1; }) && (!state.mode || c.dataset.mode === state.mode);
+      c.hidden = !ok;
+      if (ok) {
+        shown++;
+        var m = markers[c.dataset.id];
+        if (m) { cluster.addLayer(m); bounds.push(m.getLatLng()); }
+      }
+    });
+    count.textContent = shown + ' / ' + cards.length;
+    if (map) {
+      if (bounds.length) map.fitBounds(L.latLngBounds(bounds).pad(0.3), { maxZoom: 6 });
+      else map.setView([30, 20], 1);
+    }
+  }
+  apply();
+})();
+</script>
