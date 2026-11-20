@@ -71,12 +71,12 @@
   var points = window.TRAININGS || [];
   var byId = {};
   points.forEach(function (p) { byId[p.id] = p; });
-  var map = null, layer = null, markerAt = {};   // markerAt["lat,lng"] = 该地点的图钉
+  var map = null, layer = null, markerAt = {};   /* markerAt["lat,lng"] = 该地点的图钉 */
   var esc = function (s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; };
-  // 按城市分组：同一城市（city + country）的所有条目合并成一个图钉，坐标取该城市第一条
+  /* 按城市分组：同一城市（city + country）的所有条目合并成一个图钉，坐标取该城市第一条 */
   var keyOf = function (p) { return (p.city || '') + '|' + (p.country || ''); };
 
-  // ---- 地图：不聚合，任何缩放都显示图钉；同一城市的多条合并成一个图钉 ----
+  /* ---- 地图：不聚合，任何缩放都显示图钉；同一城市的多条合并成一个图钉 ---- */
   if (window.L && points.length) {
     map = L.map('tr-map', { scrollWheelZoom: false, worldCopyJump: true });
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -84,7 +84,7 @@
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
     layer = L.layerGroup().addTo(map);
-    // 点弹窗里的条目名 → 滚动到对应卡片
+    /* 点弹窗里的条目名 → 滚动到对应卡片 */
     document.getElementById('tr-map').addEventListener('click', function (e) {
       var a = e.target.closest('[data-jump]');
       if (a) { e.preventDefault(); highlight(a.getAttribute('data-jump'), false); }
@@ -129,7 +129,7 @@
     if (byId[c.dataset.id]) c.addEventListener('click', function (e) { if (e.target.tagName !== 'A') highlight(c.dataset.id, true); });
   });
 
-  // ---- filters ----
+  /* ---- filters ---- */
   var tags = {}, modes = {}, seasons = {};
   cards.forEach(function (c) {
     (c.dataset.tags || '').split(',').filter(Boolean).forEach(function (t) { tags[t] = true; });
