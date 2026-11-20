@@ -1,0 +1,98 @@
+# 课程（Module）数据。公开数据。
+# 结构：学校（colleges 为学院列表，每项 name + url，可写多个）→ 学年(session) → 分组(group，可选，如院系) → 课程(code, name, url)
+# 学位项目的网址写在首页 About me（_pages/about.md）。
+# 课程可加 note / note_url：在课程名后面加一个括号说明，括号里的文字链接到 note_url。
+# url 留空则 code 不加链接；hidden: true 可隐藏某门课。
+
+- school: "Xi'an Jiaotong-Liverpool University"
+  colleges:
+    - {name: "International Business School Suzhou", url: "https://www.xjtlu.edu.cn/en/study/departments/international-business-school-suzhou"}
+    - {name: "Academy of Artificial Intelligence and Advanced Technology", url: "https://www.xjtlu.edu.cn/en/study/departments/academy-of-artificial-intelligence-and-advanced-technology"}
+  sessions:
+    - session: "Year 0 (Foundation Year)"
+      groups:
+        - group:
+          modules:
+            - {code: "CCT 007", name: "Self-management", url: "https://modules.xjtlu.edu.cn/?mod_code=CCT007"}
+            - {code: "CCT 008", name: "Ideological and Moral Cultivation and Basis of Law", url: "https://modules.xjtlu.edu.cn/?mod_code=CCT008"}
+            - {code: "CCT 009", name: "Introduction to Literature and Media Culture", url: "https://modules.xjtlu.edu.cn/?mod_code=CCT009"}
+            - {code: "CCT 010", name: "The Modernization Process of China", url: "https://modules.xjtlu.edu.cn/?mod_code=CCT010"}
+            - {code: "EAP 029", name: "Advanced English Communication and Academic Skills 1", url: ""}
+            - {code: "EAP 038", name: "Advanced English Communication and Academic Skills II", url: ""}
+            - {code: "IOM 006", name: "Trends in Marketing and Information Technology", url: "https://modules.xjtlu.edu.cn/?mod_code=IOM006"}
+            - {code: "MTH 007", name: "Linear Algebra", url: "https://modules.xjtlu.edu.cn/?mod_code=MTH007"}
+            - {code: "MTH 008", name: "Multivariable Calculus (Science and Engineering)", url: "https://modules.xjtlu.edu.cn/?mod_code=MTH008"}
+            - {code: "MTH 013", name: "Calculus (Science & Engineering)", url: "https://modules.xjtlu.edu.cn/?mod_code=MTH013"}
+            - {code: "PHE 001", name: "Physical Education 1", url: "https://modules.xjtlu.edu.cn/?mod_code=PHE001"}
+            - {code: "PHE 002", name: "Physical Education 2", url: "https://modules.xjtlu.edu.cn/?mod_code=PHE002"}
+            - {code: "SAT 001", name: "Explore Advanced Technology", url: ""}
+            - {code: "SPA 001", name: "Spanish Language Stage 1", url: "https://modules.xjtlu.edu.cn/?mod_code=SPA001"}
+            - {code: "SPA 002", name: "Spanish Language Stage 2", url: "https://modules.xjtlu.edu.cn/?mod_code=SPA002"}
+    - session: "Year 1"
+      groups:
+        - group:
+          modules:
+            - {code: "ACC 107", name: "Foundations of Financial Accounting", url: "https://modules.xjtlu.edu.cn/?mod_code=ACC107"}
+            - {code: "CPT 103", name: "Introduction to Databases", url: ""}
+            - {code: "CPT 105", name: "Introduction to Programming in Java", url: ""}
+            - {code: "EAP 121", name: "Advanced Skills for Academic Success", url: ""}
+            - {code: "ECO 101", name: "Introduction to Statistics", url: "https://modules.xjtlu.edu.cn/?mod_code=ECO101"}
+            - {code: "ECO 104", name: "Economic Principles for Business and Markets", url: "https://modules.xjtlu.edu.cn/?mod_code=ECO104"}
+            - {code: "FIN 102", name: "Foundations of Finance", url: "https://modules.xjtlu.edu.cn/?mod_code=FIN102"}
+            - {code: "INTX 102", name: "Algorithmic Foundations and Problem Solving", url: ""}
+            - {code: "INTX 104", name: "Artificial Intelligence", url: ""}
+            - {code: "SPA 003", name: "Spanish Language Stage 3", url: "https://modules.xjtlu.edu.cn/?mod_code=SPA003"}
+- school: "University of Liverpool"
+  colleges:
+    - {name: "School of Computer Science and Informatics", url: "https://www.liverpool.ac.uk/computer-science-and-informatics/"}
+  sessions:
+    - session: "Year 2"
+      groups:
+        - group:
+          modules:
+            - {code: "COMP 201", name: "Software Engineering", url: "https://tulip.liv.ac.uk/mods/student/COMP201_202324.htm"}
+            - {code: "COMP 202", name: "Complexity Of Algorithms", url: "https://tulip.liv.ac.uk/mods/student/COMP202_202324.htm"}
+            - {code: "COMP 207", name: "Database Development", url: "https://tulip.liv.ac.uk/mods/student/COMP207_202324.htm"}
+            - {code: "COMP 208", name: "Group Software Project", url: "https://tulip.liv.ac.uk/mods/student/COMP208_202324.htm"}
+            - {code: "COMP 218", name: "Introduction To Theory Of Computation", url: "https://tulip.liv.ac.uk/mods/student/COMP218_202324.htm"}
+            - {code: "COMP 219", name: "Advanced Artificial Intelligence", url: "https://tulip.liv.ac.uk/mods/student/COMP219_202324.htm"}
+            - {code: "COMP 220", name: "Software Development Tools", url: "https://tulip.liv.ac.uk/mods/student/COMP220_202324.htm"}
+            - {code: "COMP 226", name: "Computer-Based Trading in Financial Markets", url: "https://tulip.liv.ac.uk/mods/student/COMP226_202324.htm"}
+    - session: "Year 3"
+      groups:
+        - group:
+          modules:
+            - {code: "COMP 305", name: "Biocomputation", url: "https://tulip.liv.ac.uk/mods/student/COMP305_202425.htm"}
+            - {code: "COMP 338", name: "Computer Vision", url: "https://tulip.liv.ac.uk/mods/student/COMP338_202425.htm"}
+            - {code: "ELEC 319", name: "Image Processing", url: "https://tulip.liv.ac.uk/mods/student/ELEC319_202425.htm"}
+            - {code: "COMP 304", name: "Knowledge Representation And Reasoning", url: "https://tulip.liv.ac.uk/mods/student/COMP304_202526.htm"}
+            - {code: "COMP 318", name: "Ontologies and Semantic Web", url: "https://tulip.liv.ac.uk/mods/student/COMP318_202526.htm"}
+            - {code: "COMP 337", name: "Data Mining and Visualisation", url: "https://tulip.liv.ac.uk/mods/student/COMP337_202526.htm"}
+            - {code: "COMP 390", name: "Honours Year Computer Science Project", url: "https://tulip.liv.ac.uk/mods/student/COMP390_202526.htm"}
+            - {code: "ELEC 320", name: "Neural Networks", url: "https://tulip.liv.ac.uk/mods/student/ELEC320_202526.htm"}
+- school: "National Taiwan University"
+  colleges:
+    - {name: "Office of International Affairs", url: "https://oia.ntu.edu.tw/en/"}
+  sessions:
+    - session: "Visiting Abroad"
+      groups:
+        - group: "Department of Psychology"
+          url: https://www.psy.ntu.edu.tw/index.php/eng
+          modules: []
+        - group: "Neurobiology and Cognitive Science Center"
+          url: https://neuroscience.ntu.edu.tw/
+          modules:
+            - {code: "PSY5287", name: "Seminar 1 in Neurobiology and Cognitive Science", url: "https://course.ntu.edu.tw/en/courses/114-1/35354"}
+        - group: "Graduate Institute of Brain and Mind Sciences"
+          url: https://www.mc.ntu.edu.tw/gibms/Index.action
+          modules:
+            - {code: "GIBMS7004", name: "Cognitive Science", url: "https://course.ntu.edu.tw/en/courses/114-1/59853"}
+            - {code: "GIBMS7112", name: "Functional Brain Imaging Experimental Design and Analysis", url: "https://course.ntu.edu.tw/en/courses/114-1/58869"}
+        - group: "Graduate Institute of Linguistics"
+          url: https://linguistics.ntu.edu.tw/
+          modules:
+            - {code: "LING7428", name: "Introduction to Event-Related Potential (ERP) Data Collection and Analysis", url: "https://course.ntu.edu.tw/en/courses/114-1/12569"}
+        - group: "College of Life Science"
+          url: https://webpageprodvm.ntu.edu.tw/COLS_EN/
+          modules:
+            - {code: "LS7025", name: "Techniques in Neurobiology", url: "https://course.ntu.edu.tw/en/courses/115-1/40839", note: "N5 Neuroscience LAB Program", note_url: "https://oia.ntu.edu.tw/short-term-programs/courses/bE39b4D4B4DE"}

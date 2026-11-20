@@ -1,12 +1,18 @@
-# 顶部导航栏。想显示隐藏的模块（如 Publications、Blog Posts），
-# 先在对应页面删掉 `published: false`，再把链接加到这里。
+# 顶部导航栏：只保留 Education 和 Projects。
+# children 显示成下拉菜单（鼠标移到 Education 上出现；手机宽度下收进右上角菜单，子项缩进列出）。
+# 点 Education 本身会到 /education/，它自动跳到 Module。
+# CV 页面仍在 /cv/，只是不放在导航里。
 
 main:
-  - title: "Learn"
-    url: /learn/
+  - title: "Education"
+    url: /education/
+    children:
+      - title: "Module"
+        url: /education/module/
+      - title: "Training"
+        url: /education/training/
+      - title: "Experience"
+        url: /education/experience/
 
-  - title: "Training"
-    url: /training/
-
-  - title: "CV"
-    url: /cv/
+  - title: "Projects"
+    url: /projects/

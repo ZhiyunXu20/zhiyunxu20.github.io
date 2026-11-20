@@ -1,19 +1,11 @@
----
-layout: single
-title: "Training"
-permalink: /training/
-author_profile: true
----
 {% comment %}
-  培训经历页：数据来自 _data/trainings.yml（不在公开仓库里，构建时从私有仓库拉取，
+  培训经历页：只显示 type 为 winter / summer / spring 的条目（other 不在此页）。数据来自 _data/trainings.yml（不在公开仓库里，构建时从私有仓库拉取，
   本地预览用 scripts/sync-site-data.sh 同步）。hidden: true 的条目和 notes 字段不会输出。
 {% endcomment %}
 {% assign all = site.data.trainings | default: empty %}
-{% assign visible = all | where_exp: "t", "t.hidden != true" | sort: "start", "last" | reverse %}
+{% assign visible = all | where_exp: "t", "t.hidden != true" | where_exp: "t", "t.type == 'winter' or t.type == 'summer' or t.type == 'spring'" | sort: "start", "last" | reverse %}
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
-<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
-<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
 
 <style>
   .tr-intro { margin-bottom: 1em; }
@@ -24,7 +16,7 @@ author_profile: true
   .tr-chip { border: 1px solid var(--global-border-color, #ccc); background: transparent; color: inherit; border-radius: 999px; padding: .2em .8em; cursor: pointer; font: inherit; }
   .tr-chip[aria-pressed="true"] { background: var(--global-link-color, #2f7f93); border-color: var(--global-link-color, #2f7f93); color: #fff; }
   .tr-count { margin-left: auto; opacity: .7; }
-  .tr-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1em; }
+  .tr-cards { display: grid; grid-template-columns: 1fr; gap: 1em; }
   .tr-card { border: 1px solid var(--global-border-color, #ddd); border-radius: 8px; padding: .9em 1em; font-size: .85em; display: flex; flex-direction: column; gap: .35em; cursor: default; }
   .tr-card.is-mapped { cursor: pointer; }
   .tr-card.is-active { outline: 2px solid var(--global-link-color, #2f7f93); }
@@ -36,6 +28,7 @@ author_profile: true
   .tr-tag { font-size: .8em; border-radius: 4px; padding: .05em .5em; background: var(--global-border-color, #eee); }
   .tr-tag.mode-online { background: #e7f0fb; color: #1d4f91; }
   .tr-tag.mode-in-person { background: #e8f5ec; color: #1f6b3a; }
+  .tr-tag.season { background: #fbf1e3; color: #8a5300; text-transform: capitalize; }
   .tr-empty { opacity: .7; }
   [hidden] { display: none !important; }
 </style>
@@ -48,14 +41,15 @@ author_profile: true
 
 <div class="tr-cards" id="tr-cards">
 {% for t in visible %}
-  <article class="tr-card{% if t.lat and t.lng %} is-mapped{% endif %}" data-id="{{ t.id }}" data-tags="{{ t.tags | join: ',' }}" data-mode="{{ t.mode }}">
+  <article class="tr-card{% if t.lat and t.lng %} is-mapped{% endif %}" data-id="{{ t.id }}" data-tags="{{ t.tags | join: ',' }}" data-mode="{{ t.participation }}" data-season="{{ t.type }}">
     <h3>{% if t.url %}<a href="{{ t.url }}" target="_blank" rel="noopener">{{ t.title }}</a>{% else %}{{ t.title }}{% endif %}</h3>
-    <div><strong>{{ t.role }}</strong> · {{ t.org }}</div>
+    <div>{{ t.org }}</div>
     {% if t.unit %}<div class="tr-meta">{{ t.unit }}</div>{% endif %}
-    <div class="tr-meta">{{ t.date }}{% if t.city %} · {{ t.city }}{% endif %}{% if t.country and t.city != t.country %}{% if t.city %}, {% else %} · {% endif %}{{ t.country }}{% endif %}</div>
-    {% if t.details and t.details.size > 0 %}<ul>{% for d in t.details %}<li>{{ d }}</li>{% endfor %}</ul>{% endif %}
+    <div class="tr-meta">{{ t.date }}{% if t.city %} · {{ t.city }}{% endif %}</div>
+    {% comment %} role、country、details 保留在数据里，但默认不在卡片上显示 {% endcomment %}
     <div class="tr-tags">
-      {% if t.mode %}<span class="tr-tag mode-{{ t.mode }}">{{ t.mode }}</span>{% endif %}
+      {% if t.participation %}<span class="tr-tag mode-{{ t.participation }}">{{ t.participation }}</span>{% endif %}
+      <span class="tr-tag season">{{ t.type }}</span>
       {% for tag in t.tags %}<span class="tr-tag">{{ tag }}</span>{% endfor %}
     </div>
   </article>
@@ -65,60 +59,84 @@ author_profile: true
 
 <script>
   window.TRAININGS = [
-  {% for t in visible %}{% if t.lat and t.lng %}
-    {"id": {{ t.id | jsonify }}, "title": {{ t.title | jsonify }}, "org": {{ t.org | jsonify }}, "date": {{ t.date | jsonify }}, "city": {{ t.city | jsonify }}, "lat": {{ t.lat }}, "lng": {{ t.lng }}},
+  {% for t in visible %}{% if t.lat and t.lng and t.city %}
+    {"id": {{ t.id | jsonify }}, "title": {{ t.title | jsonify }}, "org": {{ t.org | jsonify }}, "date": {{ t.date | jsonify }}, "city": {{ t.city | jsonify }}, "country": {{ t.country | jsonify }}, "lat": {{ t.lat }}, "lng": {{ t.lng }}},
   {% endif %}{% endfor %}
   ];
 </script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 <script>
 (function () {
   var cards = Array.prototype.slice.call(document.querySelectorAll('.tr-card'));
   var points = window.TRAININGS || [];
-  var map = null, cluster = null, markers = {};
+  var byId = {};
+  points.forEach(function (p) { byId[p.id] = p; });
+  var map = null, layer = null, markerAt = {};   // markerAt["lat,lng"] = 该地点的图钉
+  var esc = function (s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; };
+  // 按城市分组：同一城市（city + country）的所有条目合并成一个图钉，坐标取该城市第一条
+  var keyOf = function (p) { return (p.city || '') + '|' + (p.country || ''); };
 
-  // ---- map ----
+  // ---- 地图：不聚合，任何缩放都显示图钉；同一城市的多条合并成一个图钉 ----
   if (window.L && points.length) {
     map = L.map('tr-map', { scrollWheelZoom: false, worldCopyJump: true });
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-      maxZoom: 18, subdomains: 'abcd',
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
-    cluster = L.markerClusterGroup({ showCoverageOnHover: false, maxClusterRadius: 40 });
-    points.forEach(function (p) {
-      var m = L.marker([p.lat, p.lng], { title: p.title });
-      var esc = function (s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; };
-      m.bindPopup('<strong>' + esc(p.title) + '</strong><br>' + esc(p.org) + '<br><span style="opacity:.7">' + esc(p.date) + (p.city ? ' · ' + esc(p.city) : '') + '</span>');
-      m.on('click', function () { highlight(p.id, false); });
-      markers[p.id] = m;
+    layer = L.layerGroup().addTo(map);
+    // 点弹窗里的条目名 → 滚动到对应卡片
+    document.getElementById('tr-map').addEventListener('click', function (e) {
+      var a = e.target.closest('[data-jump]');
+      if (a) { e.preventDefault(); highlight(a.getAttribute('data-jump'), false); }
     });
-    map.addLayer(cluster);
   } else {
     document.getElementById('tr-map').hidden = true;
+  }
+
+  function drawMarkers(visibleIds) {
+    if (!layer) return [];
+    layer.clearLayers(); markerAt = {};
+    var groups = {};
+    visibleIds.forEach(function (id) {
+      var p = byId[id]; if (!p) return;
+      (groups[keyOf(p)] = groups[keyOf(p)] || []).push(p);
+    });
+    var bounds = [];
+    Object.keys(groups).forEach(function (k) {
+      var list = groups[k], first = list[0];
+      var html = (first.city ? '<strong>' + esc(first.city) + '</strong>' : '') + '<ul style="margin:.3em 0 0 1em;padding:0">' +
+        list.map(function (p) {
+          return '<li><a href="#" data-jump="' + esc(p.id) + '">' + esc(p.title) + '</a><br><span style="opacity:.7">' + esc(p.org) + ' · ' + esc(p.date) + '</span></li>';
+        }).join('') + '</ul>';
+      var m = L.marker([first.lat, first.lng], { title: list.map(function (p) { return p.title; }).join(' / ') }).bindPopup(html);
+      m.addTo(layer); markerAt[k] = m; bounds.push([first.lat, first.lng]);
+    });
+    return bounds;
   }
 
   function highlight(id, fly) {
     cards.forEach(function (c) { c.classList.toggle('is-active', c.dataset.id === id); });
     var card = document.querySelector('.tr-card[data-id="' + id + '"]');
-    if (!fly && card) card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    var m = markers[id];
-    if (fly && m && cluster) {
-      cluster.zoomToShowLayer(m, function () { m.openPopup(); });
+    if (!fly && card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    var p = byId[id], m = p && markerAt[keyOf(p)];
+    if (fly && m) {
+      map.setView(m.getLatLng(), Math.max(map.getZoom(), 5));
+      m.openPopup();
       document.getElementById('tr-map').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
   }
   cards.forEach(function (c) {
-    if (markers[c.dataset.id]) c.addEventListener('click', function (e) { if (e.target.tagName !== 'A') highlight(c.dataset.id, true); });
+    if (byId[c.dataset.id]) c.addEventListener('click', function (e) { if (e.target.tagName !== 'A') highlight(c.dataset.id, true); });
   });
 
   // ---- filters ----
-  var tags = {}, modes = {};
+  var tags = {}, modes = {}, seasons = {};
   cards.forEach(function (c) {
     (c.dataset.tags || '').split(',').filter(Boolean).forEach(function (t) { tags[t] = true; });
     if (c.dataset.mode) modes[c.dataset.mode] = true;
+    if (c.dataset.season) seasons[c.dataset.season] = true;
   });
-  var state = { tags: {}, mode: null };
+  var state = { tags: {}, mode: null, season: null };
   var bar = document.getElementById('tr-filters');
   function chip(label, pressed, onClick) {
     var b = document.createElement('button');
@@ -148,26 +166,32 @@ author_profile: true
     });
     modeButtons.push(b); gMode.appendChild(b);
   });
+  var gSeason = group('Season:');
+  var seasonButtons = [];
+  ['winter', 'summer', 'spring'].filter(function (s) { return seasons[s]; }).forEach(function (s) {
+    var b = chip(s, false, function () {
+      state.season = state.season === s ? null : s;
+      seasonButtons.forEach(function (x) { x.setAttribute('aria-pressed', x.textContent === state.season ? 'true' : 'false'); });
+      apply();
+    });
+    seasonButtons.push(b); gSeason.appendChild(b);
+  });
   var count = document.createElement('span'); count.className = 'tr-count'; bar.appendChild(count);
 
   function apply() {
     var active = Object.keys(state.tags).filter(function (t) { return state.tags[t]; });
-    var shown = 0;
-    if (cluster) cluster.clearLayers();
-    var bounds = [];
+    var shown = 0, visibleIds = [];
     cards.forEach(function (c) {
       var ct = (c.dataset.tags || '').split(',');
-      var ok = active.every(function (t) { return ct.indexOf(t) !== -1; }) && (!state.mode || c.dataset.mode === state.mode);
+      var ok = active.every(function (t) { return ct.indexOf(t) !== -1; }) && (!state.mode || c.dataset.mode === state.mode) && (!state.season || c.dataset.season === state.season);
       c.hidden = !ok;
-      if (ok) {
-        shown++;
-        var m = markers[c.dataset.id];
-        if (m) { cluster.addLayer(m); bounds.push(m.getLatLng()); }
-      }
+      if (ok) { shown++; visibleIds.push(c.dataset.id); }
     });
     count.textContent = shown + ' / ' + cards.length;
     if (map) {
-      if (bounds.length) map.fitBounds(L.latLngBounds(bounds).pad(0.3), { maxZoom: 6 });
+      var bounds = drawMarkers(visibleIds);
+      map.invalidateSize();
+      if (bounds.length) map.fitBounds(L.latLngBounds(bounds).pad(0.3), { maxZoom: 6, animate: false });
       else map.setView([30, 20], 1);
     }
   }

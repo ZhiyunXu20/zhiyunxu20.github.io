@@ -26,9 +26,9 @@ author:
   avatar           : "profile.png"
   name             : "Zhiyun Xu"
   pronouns         : # example: "she/her"  
-  bio              : "Undergraduate Student"
+  bio              : "Graduate Student"
   location         : "Liverpool, UK"
-  employer         : "University of Liverpool"
+  employer         : # "University of Liverpool"  （侧栏不显示学校）
   uri              : # URL
   email            : "sgzxu41@liverpool.ac.uk" 
 
@@ -254,7 +254,7 @@ defaults:
     values:
       published: false # 示例博客，已隐藏；删除此行即可发布
       layout: single
-      author_profile: true
+      author_profile: false   # 左侧栏只在 About me 显示
       read_time: true
       comments: true
       share: true
@@ -265,14 +265,14 @@ defaults:
       type: pages
     values:
       layout: single
-      author_profile: true
+      author_profile: false   # 左侧栏只在 About me 显示
   # _teaching
   - scope:
       path: ""
       type: teaching
     values:
       layout: single
-      author_profile: true
+      author_profile: false   # 左侧栏只在 About me 显示
       share: true
       comments: true
   # _publications
@@ -281,7 +281,7 @@ defaults:
       type: publications
     values:
       layout: single
-      author_profile: true
+      author_profile: false   # 左侧栏只在 About me 显示
       share: true
       comments: true
   # _portfolio
@@ -290,7 +290,7 @@ defaults:
       type: portfolio
     values:
       layout: single
-      author_profile: true
+      author_profile: false   # 左侧栏只在 About me 显示
       share: true
       comment: true
   # _talks
@@ -299,7 +299,7 @@ defaults:
       type: talks
     values:
       layout: talk
-      author_profile: true
+      author_profile: false   # 左侧栏只在 About me 显示
       share: true
 
 

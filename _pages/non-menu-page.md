@@ -2,7 +2,7 @@
 published: false # 示例页面，已隐藏；删除此行即可发布
 permalink: /non-menu-page/
 title: "Page not in menu"
-author_profile: true
+author_profile: false
 redirect_from: 
   - "/nmp/"
   - "/nmp.html"

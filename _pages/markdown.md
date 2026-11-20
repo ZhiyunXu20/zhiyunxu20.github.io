@@ -2,7 +2,7 @@
 published: false # 示例页面，已隐藏；删除此行即可发布
 permalink: /markdown/
 title: "Markdown"
-author_profile: true
+author_profile: false
 redirect_from: 
   - /md/
   - /markdown.html

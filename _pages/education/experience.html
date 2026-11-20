@@ -1,0 +1,35 @@
+---
+permalink: /education/experience/
+title: "Experience"
+author_profile: false
+---
+{% comment %}
+  科研经历：读取 _data/trainings.yml 中 section: education-research 的条目（排除 hidden）。
+  显示 role 作为身份标签（如 Research Assistant / Intern）；不显示 country、details。
+{% endcomment %}
+{% assign all = site.data.trainings | default: empty %}
+{% assign items = all | where_exp: "t", "t.hidden != true" | where: "section", "education-research" | sort: "start", "last" | reverse %}
+
+<style>
+  .ex-cards { display: grid; grid-template-columns: 1fr; gap: 1em; }
+  .ex-card { border: 1px solid var(--global-border-color, #ddd); border-radius: 8px; padding: .9em 1em; font-size: .85em; display: flex; flex-direction: column; gap: .35em; }
+  .ex-card h3 { font-size: 1.05em; margin: 0; line-height: 1.3; }
+  .ex-meta { opacity: .75; }
+  .ex-tags { display: flex; flex-wrap: wrap; gap: .3em; padding-top: .4em; }
+  .ex-role { display: inline-block; font-size: .8em; font-weight: bold; border-radius: 4px; padding: .05em .55em; background: #e7f0fb; color: #1d4f91; }
+  .ex-tag { font-size: .8em; border-radius: 4px; padding: .05em .5em; background: var(--global-border-color, #eee); }
+</style>
+
+<div class="ex-cards">
+{% for t in items %}
+  <article class="ex-card">
+    <h3>{% if t.url %}<a href="{{ t.url }}" target="_blank" rel="noopener">{{ t.title }}</a>{% else %}{{ t.title }}{% endif %}</h3>
+    {% if t.role %}<div><span class="ex-role">{{ t.role }}</span></div>{% endif %}
+    <div>{{ t.org }}</div>
+    {% if t.unit %}<div class="ex-meta">{{ t.unit }}</div>{% endif %}
+    <div class="ex-meta">{{ t.date }}{% if t.city %} · {{ t.city }}{% endif %}</div>
+    {% if t.tags and t.tags.size > 0 %}<div class="ex-tags">{% for tag in t.tags %}<span class="ex-tag">{{ tag }}</span>{% endfor %}</div>{% endif %}
+  </article>
+{% endfor %}
+</div>
+{% if items.size == 0 %}<p style="opacity:.7">No research experience yet.</p>{% endif %}

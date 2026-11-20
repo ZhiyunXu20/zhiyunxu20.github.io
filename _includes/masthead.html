@@ -13,8 +13,15 @@
             {% else %}
               {% assign domain = base_path %}
             {% endif %}
-            <li class="masthead__menu-item {% if page.url contains link.url and link.url != '/' %}selected{% endif %}">
-              <a href="{{ domain }}{{ link.url }}">{{ link.title }}</a>
+            <li class="masthead__menu-item{% if link.children %} masthead__menu-item--has-children{% endif %} {% if page.url contains link.url and link.url != '/' %}selected{% endif %}">
+              <a href="{{ domain }}{{ link.url }}"{% if link.children %} aria-haspopup="true"{% endif %}>{{ link.title }}</a>
+              {% if link.children %}
+              <ul class="masthead__submenu">
+                {% for child in link.children %}
+                <li><a href="{{ domain }}{{ child.url }}"{% if page.url == child.url %} aria-current="page"{% endif %}>{{ child.title }}</a></li>
+                {% endfor %}
+              </ul>
+              {% endif %}
             </li>
           {% endfor %}
           <li id="theme-toggle" class="masthead__menu-item persist tail">
@@ -27,3 +34,16 @@
     </div>
   </div>
 </div>
+<script>
+  // 触屏设备没有"悬停"：第一次点 Education 只展开下拉（Module / Training / Experience），再点一次才进入；点页面其它地方收起
+  (function () {
+    if (!window.matchMedia || !window.matchMedia('(hover: none)').matches) return;
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest('.visible-links .masthead__menu-item--has-children > a');
+      document.querySelectorAll('.masthead__menu-item--has-children.is-open').forEach(function (li) {
+        if (!a || li !== a.parentNode) li.classList.remove('is-open');
+      });
+      if (a && !a.parentNode.classList.contains('is-open')) { e.preventDefault(); a.parentNode.classList.add('is-open'); }
+    });
+  })();
+</script>
