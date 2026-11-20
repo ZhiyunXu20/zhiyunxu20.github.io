@@ -1,0 +1,200 @@
+{% comment %}
+  培训经历页：只显示 type 为 winter / summer / spring 的条目（other 不在此页）。数据来自 _data/trainings.yml（不在公开仓库里，构建时从私有仓库拉取，
+  本地预览用 scripts/sync-site-data.sh 同步）。hidden: true 的条目和 notes 字段不会输出。
+{% endcomment %}
+{% assign all = site.data.trainings | default: empty %}
+{% assign visible = all | where_exp: "t", "t.hidden != true" | where_exp: "t", "t.type == 'winter' or t.type == 'summer' or t.type == 'spring'" | sort: "start", "last" | reverse %}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+
+<style>
+  .tr-intro { margin-bottom: 1em; }
+  .tr-map { height: 420px; border-radius: 8px; margin: 0 0 1.25em; border: 1px solid var(--global-border-color, #ddd); z-index: 0; }
+  .tr-filters { display: flex; flex-wrap: wrap; gap: .5em .75em; align-items: center; margin-bottom: 1em; font-size: .85em; }
+  .tr-filters .tr-group { display: flex; flex-wrap: wrap; gap: .4em; align-items: center; }
+  .tr-filters .tr-label { opacity: .7; margin-right: .2em; }
+  .tr-chip { border: 1px solid var(--global-border-color, #ccc); background: transparent; color: inherit; border-radius: 999px; padding: .2em .8em; cursor: pointer; font: inherit; }
+  .tr-chip[aria-pressed="true"] { background: var(--global-link-color, #2f7f93); border-color: var(--global-link-color, #2f7f93); color: #fff; }
+  .tr-count { margin-left: auto; opacity: .7; }
+  .tr-cards { display: grid; grid-template-columns: 1fr; gap: 1em; }
+  .tr-card { border: 1px solid var(--global-border-color, #ddd); border-radius: 8px; padding: .9em 1em; font-size: .85em; display: flex; flex-direction: column; gap: .35em; cursor: default; }
+  .tr-card.is-mapped { cursor: pointer; }
+  .tr-card.is-active { outline: 2px solid var(--global-link-color, #2f7f93); }
+  .tr-card h3 { font-size: 1.05em; margin: 0; line-height: 1.3; }
+  .tr-meta { opacity: .75; }
+  .tr-card ul { margin: .2em 0 0 1.1em; padding: 0; }
+  .tr-card li { margin: 0; }
+  .tr-tags { display: flex; flex-wrap: wrap; gap: .3em; margin-top: auto; padding-top: .4em; }
+  .tr-tag { font-size: .8em; border-radius: 4px; padding: .05em .5em; background: var(--global-border-color, #eee); }
+  .tr-tag.mode-online { background: #e7f0fb; color: #1d4f91; }
+  .tr-tag.mode-in-person { background: #e8f5ec; color: #1f6b3a; }
+  .tr-tag.season { background: #fbf1e3; color: #8a5300; text-transform: capitalize; }
+  .tr-empty { opacity: .7; }
+  [hidden] { display: none !important; }
+</style>
+
+<p class="tr-intro">Schools, courses and research training I have taken part in. Click a card to find it on the map; use the tags to filter.</p>
+
+<div id="tr-map" class="tr-map" role="region" aria-label="Map of training locations"></div>
+
+<div class="tr-filters" id="tr-filters"></div>
+
+<div class="tr-cards" id="tr-cards">
+{% for t in visible %}
+  <article class="tr-card{% if t.lat and t.lng %} is-mapped{% endif %}" data-id="{{ t.id }}" data-tags="{{ t.tags | join: ',' }}" data-mode="{{ t.participation }}" data-season="{{ t.type }}">
+    <h3>{% if t.url %}<a href="{{ t.url }}" target="_blank" rel="noopener">{{ t.title }}</a>{% else %}{{ t.title }}{% endif %}</h3>
+    <div>{{ t.org }}</div>
+    {% if t.unit %}<div class="tr-meta">{{ t.unit }}</div>{% endif %}
+    <div class="tr-meta">{{ t.date }}{% if t.city %} · {{ t.city }}{% endif %}</div>
+    {% comment %} role、country、details 保留在数据里，但默认不在卡片上显示 {% endcomment %}
+    <div class="tr-tags">
+      {% if t.participation %}<span class="tr-tag mode-{{ t.participation }}">{{ t.participation }}</span>{% endif %}
+      <span class="tr-tag season">{{ t.type }}</span>
+      {% for tag in t.tags %}<span class="tr-tag">{{ tag }}</span>{% endfor %}
+    </div>
+  </article>
+{% endfor %}
+</div>
+{% if visible.size == 0 %}<p class="tr-empty">No training data found. Add <code>_data/trainings.yml</code> (see <code>scripts/sync-site-data.sh</code>).</p>{% endif %}
+
+<script>
+  window.TRAININGS = [
+  {% for t in visible %}{% if t.lat and t.lng and t.city %}
+    {"id": {{ t.id | jsonify }}, "title": {{ t.title | jsonify }}, "org": {{ t.org | jsonify }}, "date": {{ t.date | jsonify }}, "city": {{ t.city | jsonify }}, "country": {{ t.country | jsonify }}, "lat": {{ t.lat }}, "lng": {{ t.lng }}},
+  {% endif %}{% endfor %}
+  ];
+</script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+(function () {
+  var cards = Array.prototype.slice.call(document.querySelectorAll('.tr-card'));
+  var points = window.TRAININGS || [];
+  var byId = {};
+  points.forEach(function (p) { byId[p.id] = p; });
+  var map = null, layer = null, markerAt = {};   // markerAt["lat,lng"] = 该地点的图钉
+  var esc = function (s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; };
+  // 按城市分组：同一城市（city + country）的所有条目合并成一个图钉，坐标取该城市第一条
+  var keyOf = function (p) { return (p.city || '') + '|' + (p.country || ''); };
+
+  // ---- 地图：不聚合，任何缩放都显示图钉；同一城市的多条合并成一个图钉 ----
+  if (window.L && points.length) {
+    map = L.map('tr-map', { scrollWheelZoom: false, worldCopyJump: true });
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+    layer = L.layerGroup().addTo(map);
+    // 点弹窗里的条目名 → 滚动到对应卡片
+    document.getElementById('tr-map').addEventListener('click', function (e) {
+      var a = e.target.closest('[data-jump]');
+      if (a) { e.preventDefault(); highlight(a.getAttribute('data-jump'), false); }
+    });
+  } else {
+    document.getElementById('tr-map').hidden = true;
+  }
+
+  function drawMarkers(visibleIds) {
+    if (!layer) return [];
+    layer.clearLayers(); markerAt = {};
+    var groups = {};
+    visibleIds.forEach(function (id) {
+      var p = byId[id]; if (!p) return;
+      (groups[keyOf(p)] = groups[keyOf(p)] || []).push(p);
+    });
+    var bounds = [];
+    Object.keys(groups).forEach(function (k) {
+      var list = groups[k], first = list[0];
+      var html = (first.city ? '<strong>' + esc(first.city) + '</strong>' : '') + '<ul style="margin:.3em 0 0 1em;padding:0">' +
+        list.map(function (p) {
+          return '<li><a href="#" data-jump="' + esc(p.id) + '">' + esc(p.title) + '</a><br><span style="opacity:.7">' + esc(p.org) + ' · ' + esc(p.date) + '</span></li>';
+        }).join('') + '</ul>';
+      var m = L.marker([first.lat, first.lng], { title: list.map(function (p) { return p.title; }).join(' / ') }).bindPopup(html);
+      m.addTo(layer); markerAt[k] = m; bounds.push([first.lat, first.lng]);
+    });
+    return bounds;
+  }
+
+  function highlight(id, fly) {
+    cards.forEach(function (c) { c.classList.toggle('is-active', c.dataset.id === id); });
+    var card = document.querySelector('.tr-card[data-id="' + id + '"]');
+    if (!fly && card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    var p = byId[id], m = p && markerAt[keyOf(p)];
+    if (fly && m) {
+      map.setView(m.getLatLng(), Math.max(map.getZoom(), 5));
+      m.openPopup();
+      document.getElementById('tr-map').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
+  cards.forEach(function (c) {
+    if (byId[c.dataset.id]) c.addEventListener('click', function (e) { if (e.target.tagName !== 'A') highlight(c.dataset.id, true); });
+  });
+
+  // ---- filters ----
+  var tags = {}, modes = {}, seasons = {};
+  cards.forEach(function (c) {
+    (c.dataset.tags || '').split(',').filter(Boolean).forEach(function (t) { tags[t] = true; });
+    if (c.dataset.mode) modes[c.dataset.mode] = true;
+    if (c.dataset.season) seasons[c.dataset.season] = true;
+  });
+  var state = { tags: {}, mode: null, season: null };
+  var bar = document.getElementById('tr-filters');
+  function chip(label, pressed, onClick) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'tr-chip'; b.textContent = label;
+    b.setAttribute('aria-pressed', pressed ? 'true' : 'false');
+    b.addEventListener('click', function () { onClick(b); });
+    return b;
+  }
+  function group(label) {
+    var g = document.createElement('div'); g.className = 'tr-group';
+    var s = document.createElement('span'); s.className = 'tr-label'; s.textContent = label;
+    g.appendChild(s); bar.appendChild(g); return g;
+  }
+  var gTopic = group('Topic:');
+  Object.keys(tags).sort().forEach(function (t) {
+    gTopic.appendChild(chip(t, false, function (b) {
+      state.tags[t] = !state.tags[t]; b.setAttribute('aria-pressed', state.tags[t] ? 'true' : 'false'); apply();
+    }));
+  });
+  var gMode = group('Format:');
+  var modeButtons = [];
+  ['in-person', 'online'].filter(function (m) { return modes[m]; }).forEach(function (m) {
+    var b = chip(m, false, function () {
+      state.mode = state.mode === m ? null : m;
+      modeButtons.forEach(function (x) { x.setAttribute('aria-pressed', x.textContent === state.mode ? 'true' : 'false'); });
+      apply();
+    });
+    modeButtons.push(b); gMode.appendChild(b);
+  });
+  var gSeason = group('Season:');
+  var seasonButtons = [];
+  ['winter', 'summer', 'spring'].filter(function (s) { return seasons[s]; }).forEach(function (s) {
+    var b = chip(s, false, function () {
+      state.season = state.season === s ? null : s;
+      seasonButtons.forEach(function (x) { x.setAttribute('aria-pressed', x.textContent === state.season ? 'true' : 'false'); });
+      apply();
+    });
+    seasonButtons.push(b); gSeason.appendChild(b);
+  });
+  var count = document.createElement('span'); count.className = 'tr-count'; bar.appendChild(count);
+
+  function apply() {
+    var active = Object.keys(state.tags).filter(function (t) { return state.tags[t]; });
+    var shown = 0, visibleIds = [];
+    cards.forEach(function (c) {
+      var ct = (c.dataset.tags || '').split(',');
+      var ok = active.every(function (t) { return ct.indexOf(t) !== -1; }) && (!state.mode || c.dataset.mode === state.mode) && (!state.season || c.dataset.season === state.season);
+      c.hidden = !ok;
+      if (ok) { shown++; visibleIds.push(c.dataset.id); }
+    });
+    count.textContent = shown + ' / ' + cards.length;
+    if (map) {
+      var bounds = drawMarkers(visibleIds);
+      map.invalidateSize();
+      if (bounds.length) map.fitBounds(L.latLngBounds(bounds).pad(0.3), { maxZoom: 6, animate: false });
+      else map.setView([30, 20], 1);
+    }
+  }
+  apply();
+})();
+</script>

@@ -3,23 +3,101 @@
 # This config file is meant for settings that affect your entire site, values
 # which you are expected to set up once and rarely need to edit after that.
 # For technical reasons, this file is *NOT* reloaded automatically when you use
-# `jekyll serve`. If you change this file, please restart the server process.
+# `jekyll serve -l -H localhost`. If you change this file, please restart the 
+# server process.
 
-# Site Settings
+# Basic Site Settings
 locale                   : "en-US"
+site_theme               : "default" # The available themes options are "default", "air", "sunrise", "mint", "dirt" and "contrast"
 title                    : "Zhiyun Xu"
 title_separator          : "-"
 name                     : &name "Zhiyun Xu"
-description              : &description #"Postdoc in Political Science"
-url                      : #"https://zhiyunxu20.github.io" # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
+description              : &description "Zhiyun Xu's personal website"
+url                      : https://zhiyunxu20.github.io
+                                                           # or if you already have some other page hosted on Github then use "https://[your GitHub username].github.io/[Your Repo Name]"
 baseurl                  : "" # the subpath of your site, e.g. "/blog"
-repository               : #"ZhiyunXu20/zhiyunxu20.github.io"
-teaser                   : # filename of teaser fallback teaser image placed in /images/, .e.g. "500x300.png"
+repository               : "ZhiyunXu20/zhiyunxu20.github.io"
+
+# Site Author - The following control what appear as part of the author content on the side bar.
+#               If a field is blank the icon and link will not appear, otherwise it will be shown.
+#               Additional customization can be done by editing /_includes/author-profile.html
+author:
+  # Biographic information
+  avatar           : "profile.png"
+  name             : "Zhiyun Xu"
+  pronouns         : # example: "she/her"  
+  bio              : "Graduate Student"
+  location         : "Liverpool, UK"
+  employer         : # "University of Liverpool"  （侧栏不显示学校）
+  uri              : # URL
+  email            : "sgzxu41@liverpool.ac.uk" 
+
+  # Academic websites
+  academia         : # URL
+  arxiv            : # URL - Update with the correct link to your profile
+  googlescholar    : # URL
+  inspire-hep      : # URL
+  impactstory      : # URL
+  orcid            : # URL
+  semantic         : # URL
+  ssrn             : # URL
+  pubmed           : # URL
+  researchgate     : # URL
+  scopus           : # URL
+  zotero           : # URL
+
+
+  # Repositories and software development
+  bitbucket        : # Username - Update with your username on the site
+  codepen          : # Username
+  dribbble         : # Username
+  github           : "ZhiyunXu20"
+  kaggle           : # Username  
+  stackoverflow    : # User number or user number and name (i.e., use "1" or "1/jeff-atwood")    
+
+  # Social media
+  artstation       : # Username
+  bluesky          : # Username
+  facebook         : # Username
+  flickr           : # Username
+  foursquare       : # Username
+  goodreads        : # Username
+  google_plus      : # Username
+  keybase          : # Username
+  instagram        : # Username
+  lastfm           : # Username
+  linkedin         : # Username
+  mastodon         : # URL
+  medium           : # URL
+  pinterest        : # Username
+  soundcloud       : # Username
+  steam            : # Username
+  telegram         : # URL
+  tumblr           : # Username
+  twitter          : # Username for X / Twitter
+  vine             : # Username
+  weibo            : # Username
+  wikipedia        : # Username
+  xing             : # Username
+  youtube          : # Username
+  zhihu            : # Username
+
+# Publication Category - The following the list of publication categories and their headings
+publication_category:
+  books:
+    title: 'Books'
+  manuscripts:
+    title: 'Journal Articles'    
+  conferences:
+    title: 'Conference Papers'
+
+# Site Settings
+teaser                   :  # filename of teaser fallback teaser image placed in /images/ for social media previews
 breadcrumbs              : false # true, false (default)
 words_per_minute         : 160
 future                   : false
 read_more                : "disabled" # if enabled, adds "Read more" links to excerpts
-talkmap_link             : false #change to true to add link to talkmap on talks page
+talkmap_link             : false      #change to true to add link to talkmap on talks page
 comments:
   provider               : # false (default), "disqus", "discourse", "facebook", "google-plus", "staticman", "custom"
   disqus:
@@ -47,7 +125,9 @@ staticman:
       options:
         format           : "iso8601" # "iso8601" (default), "timestamp-seconds", "timestamp-milliseconds"
 atom_feed:
+  hide                   : false     # change to true to hide the RSS feed in the footer
   path                   : # blank (default) uses feed.xml
+
 
 # SEO Related
 google_site_verification :
@@ -55,16 +135,16 @@ bing_site_verification   :
 alexa_site_verification  :
 yandex_site_verification :
 
+
 # Social Sharing
-mastodon:
-  username               : #"fosstodon.org/@jayrobw"
 twitter:
-  username               : 
+  username               : &twitter
 facebook:
   username               :
   app_id                 :
   publisher              :
-og_image                 : profile.png # Open Graph/Twitter default site image
+og_image                 : og-image.png   # Social media default site image (lives in /images/)
+og_description           :  # Social media default site image description
 # For specifying social profiles
 # - https://developers.google.com/structured-data/customize/social-profiles
 social:
@@ -75,52 +155,9 @@ social:
 
 # Analytics
 analytics:
-  provider               : "goatcounter" # false (default), "google", "google-universal", "custom", "goatcounter"
+  provider               :  "false" # false (default), "google", "google-universal", "google-analytics-4", "custom"
   google:
-    tracking_id          : 
-  goatcounter:
-    code		 : #?????
-
-
-# Site Author
-author:
-  name             : "Zhiyun Xu"
-  avatar           : "profile.png"
-  bio              : "Undergraduate Student"
-  location         :
-  employer         :
-  pubmed           :
-  orcid            : #"http://orcid.org/0000-0001-9259-3883"
-  googlescholar    : #"https://scholar.google.com/citations?user=fiaPSmgAAAAJ"
-  email            : "sgzxu41@liverpool.ac.uk"
-  researchgate     :  # example: "https://www.researchgate.net/profile/yourprofile"
-  uri              :
-  bitbucket        :
-  codepen          :
-  dribbble         :
-  flickr           :
-  facebook         :
-  foursquare       :
-  github           : "ZhiyunXu20"
-  gitlab           : #"?????"
-  google_plus      :
-  keybase          :
-  instagram        :
-  impactstory      : #"https://profiles.impactstory.org/u/xxxx-xxxx-xxxx-xxxx"
-  lastfm           :
-  linkedin         :
-  mastodon         : #"fosstodon.org/@jayrobw"
-  pinterest        :
-  soundcloud       :
-  stackoverflow    : #"https://stackoverflow.com/users/10912314/?????"
-  steam            :
-  tumblr           :
-  twitter          : 
-  vine             :
-  weibo            :
-  xing             :
-  youtube          :
-  wikipedia        :
+    tracking_id          :
 
 
 # Reading Files
@@ -133,38 +170,37 @@ exclude:
   - "*.sublime-workspace"
   - .asset-cache
   - .bundle
-  - .Rproj.user
-  - _source
+  - .github
   - .jekyll-assets-cache
   - .sass-cache
-  - CHANGELOG
-  - Capfile
-  - Gemfile
-  - Gruntfile.js
-  - LICENSE
-  - README
-  - Rakefile
   - assets/js/_main.js
   - assets/js/plugins
   - assets/js/vendor
+  - CHANGELOG
+  - Capfile
   - config
+  - Dockerfile
+  - Gemfile
+  - Gruntfile.js
   - gulpfile.js
+  - LICENSE
+  - local
   - log
   - node_modules
-  - package.json
+  - package.json*
+  - Rakefile
+  - AGENTS.md
+  - docker-compose.yaml
+  - _config_docker.yml
+  - markdown_generator
+  - scripts
+  - talkmap
+  - talkmap.ipynb
+  - talkmap.py
+  - talkmap_out.ipynb
+  - README
   - tmp
   - vendor
-  # 不需要发布的开发/模板文件
-  - node_modules
-  - package-lock.json
-  - CONTRIBUTING.md
-  - CHANGELOG.md
-  - Website.Rproj
-  - markdown_generator
-  - data
-  - talkmap
-  - files/html/posts
-  - files/html/teaching-materials
 keep_files:
   - .git
   - .svn
@@ -185,6 +221,7 @@ kramdown:
   input: GFM
   hard_wrap: false
   auto_ids: true
+  header_links: true
   footnote_nr: 1
   entity_output: as_char
   toc_levels: 1..6
@@ -192,29 +229,32 @@ kramdown:
   enable_coderay: false
 
 
-# Collections
+# These settings control the types of collections used by the template
 collections:
-  publications:
-    output: false # 原模板内容，已隐藏；改为 true 即可重新发布
+  teaching:
+    output: false # 示例模块，已隐藏；改为 true 即可发布
     permalink: /:collection/:path/
-  research:
-    output: false # 原模板内容，已隐藏；改为 true 即可重新发布
+  publications:
+    output: false # 示例模块，已隐藏；改为 true 即可发布
+    permalink: /:collection/:path/
+  portfolio:
+    output: false # 示例模块，已隐藏；改为 true 即可发布
     permalink: /:collection/:path/
   talks:
-    output: false # 原模板内容，已隐藏；改为 true 即可重新发布
+    output: false # 示例模块，已隐藏；改为 true 即可发布
     permalink: /:collection/:path/
 
 
-# Defaults
+# These settings control how pages and collections are included in the site
 defaults:
   # _posts
   - scope:
       path: ""
       type: posts
     values:
-      published: false # 原模板博客，已隐藏；删除此行即可重新发布
+      published: false # 示例博客，已隐藏；删除此行即可发布
       layout: single
-      author_profile: true
+      author_profile: false   # 左侧栏只在 About me 显示
       read_time: true
       comments: true
       share: true
@@ -225,14 +265,14 @@ defaults:
       type: pages
     values:
       layout: single
-      author_profile: true
+      author_profile: false   # 左侧栏只在 About me 显示
   # _teaching
   - scope:
       path: ""
       type: teaching
     values:
       layout: single
-      author_profile: true
+      author_profile: false   # 左侧栏只在 About me 显示
       share: true
       comments: true
   # _publications
@@ -241,16 +281,16 @@ defaults:
       type: publications
     values:
       layout: single
-      author_profile: true
+      author_profile: false   # 左侧栏只在 About me 显示
       share: true
       comments: true
-  # _research
+  # _portfolio
   - scope:
       path: ""
-      type: research
+      type: portfolio
     values:
       layout: single
-      author_profile: true
+      author_profile: false   # 左侧栏只在 About me 显示
       share: true
       comment: true
   # _talks
@@ -259,35 +299,39 @@ defaults:
       type: talks
     values:
       layout: talk
-      author_profile: true
+      author_profile: false   # 左侧栏只在 About me 显示
       share: true
+
 
 # Sass/SCSS
 sass:
   sass_dir: _sass
-  style: compressed # http://sass-lang.com/documentation/file.SASS_REFERENCE.html#output_style
+  style: compressed # https://sass-lang.com/documentation/file.SASS_REFERENCE.html#output_style
 
 
 # Outputting
 permalink: /:categories/:title/
 # paginate: 5 # amount of posts to show
 # paginate_path: /page:num/
-timezone: America/Chicago # http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+timezone: Etc/UTC # https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 
 
 # Plugins
 plugins:
+  - jekyll-feed
+  - jekyll-gist
   - jekyll-paginate
   - jekyll-sitemap
-  - jekyll-gist
-  - jekyll-feed
   - jekyll-redirect-from
-# mimic GitHub Pages with --safe
+  - jemoji
+
+# Mimic GitHub Pages with --safe
 whitelist:
+  - jekyll-feed
+  - jekyll-gist
   - jekyll-paginate
   - jekyll-sitemap
-  - jekyll-gist
-  - jekyll-feed
+  - jekyll-redirect-from
   - jemoji
 
 
@@ -321,8 +365,9 @@ tag_archive:
 
 
 # HTML Compression
-# - http://jch.penibelst.de/
+# - https://jch.penibelst.de/
 compress_html:
   clippings: all
+  comments: ["<!-- ", " -->"]
   ignore:
     envs: development

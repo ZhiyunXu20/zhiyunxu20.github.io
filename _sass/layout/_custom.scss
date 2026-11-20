@@ -1,0 +1,49 @@
+/* ==========================================================================
+   个人自定义样式（放在最后加载，覆盖主题默认）
+   ========================================================================== */
+
+/* 全站超链接不加下划线（悬停也不加） */
+a,
+a:hover,
+a:focus,
+a:visited {
+  text-decoration: none !important;
+}
+
+/* 导航下拉修复：主题把"当前栏目"里的所有链接设成 pointer-events: none（防止点当前页），
+   这会连带禁用 Education 下拉里的 Module / Training / Experience，导致在这些子页面里导航点不动。
+   这里让带下拉的栏目和它的子链接始终可点；当前子页面用加粗表示。 */
+.masthead__menu-item--has-children.selected > a,
+.masthead__menu-item--has-children .masthead__submenu a {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+.masthead__menu-item--has-children .masthead__submenu a {
+  border-bottom: none !important;
+  font-weight: normal !important;
+  color: var(--global-masthead-link-color) !important;
+
+  &[aria-current="page"] {
+    font-weight: 700 !important;
+    color: var(--global-text-color) !important;
+  }
+}
+
+/* 没有左侧栏（author_profile: false）的页面：去掉为侧栏预留的左边距，
+   内容居中、限制最大宽度；About me 页面不受影响。 */
+#main.no-sidebar {
+  .sidebar {
+    display: none;
+  }
+
+  .page {
+    float: none;
+    width: 100%;
+    max-width: 1100px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
