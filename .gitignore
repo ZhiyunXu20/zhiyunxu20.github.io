@@ -27,3 +27,4 @@ assets/js/main.min.js
 
 # 私有数据：构建时从私有仓库 site-data 拉取，不提交到公开仓库
 _data/trainings.yml
+_data/races.json

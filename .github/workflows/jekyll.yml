@@ -44,7 +44,7 @@ jobs:
         run: |
           uglifyjs assets/js/plugins/jquery.greedy-navigation.js assets/js/_main.js assets/js/theme.js -c -m -o assets/js/main.min.js
       - name: Fetch private site data
-        # 私有数据（如培训经历）放在私有仓库 ZhiyunXu20/site-data，
+        # 私有数据（培训经历 trainings.yml、赛事数据 races.json）放在私有仓库 ZhiyunXu20/site-data，
         # 用仓库 Secret SITE_DATA_TOKEN（只读的 fine-grained token）拉取，只在构建时使用，不会提交到本仓库。
         env:
           SITE_DATA_TOKEN: ${{ secrets.SITE_DATA_TOKEN }}
@@ -54,7 +54,9 @@ jobs:
             exit 0
           fi
           git clone --depth 1 "https://x-access-token:${SITE_DATA_TOKEN}@github.com/ZhiyunXu20/site-data.git" /tmp/site-data
-          cp /tmp/site-data/trainings.yml _data/trainings.yml
+          for f in trainings.yml races.json; do
+            if [ -f "/tmp/site-data/$f" ]; then cp "/tmp/site-data/$f" "_data/$f"; else echo "::warning::$f not found in site-data"; fi
+          done
           rm -rf /tmp/site-data
       - name: Configure GitHub Pages
         id: pages

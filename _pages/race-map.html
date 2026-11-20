@@ -1,0 +1,26 @@
+---
+layout: single
+title: "Sport Event Map"
+permalink: /projects/race-map/
+author_profile: false
+classes: wide
+---
+{% comment %}
+  赛事地图：世界 → 国家 → 省三级下钻 + 赛事卡片。
+  数据 _data/races.json 不在公开仓库里（只含 public 字段，构建时从私有仓库 site-data 拉取，
+  本地预览用 scripts/sync-site-data.sh 同步）。中英文对照在 _data/race_i18n.json。
+  边界文件在 assets/race-map/geo/（中国用国内标准边界；世界图不画国界线）。
+{% endcomment %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<link rel="stylesheet" href="{{ '/assets/race-map/race-map.css' | relative_url }}">
+
+
+<div id="race-map" class="race-map" data-geo="{{ '/assets/race-map/geo/' | relative_url }}"></div>
+{% if site.data.races == nil %}<p>No race data found. Add <code>_data/races.json</code> (see <code>scripts/sync-site-data.sh</code>).</p>{% endif %}
+
+<script id="rm-races" type="application/json">{{ site.data.races | jsonify }}</script>
+<script id="rm-i18n" type="application/json">{{ site.data.race_i18n | jsonify }}</script>
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="{{ '/assets/race-map/race-map.js' | relative_url }}"></script>

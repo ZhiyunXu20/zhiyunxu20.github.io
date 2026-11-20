@@ -9,6 +9,6 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 SRC="${SITE_DATA_DIR:-../site-data}"
 if [ -d "$SRC/.git" ]; then git -C "$SRC" pull --ff-only --quiet || true; fi
-for f in trainings.yml; do
+for f in trainings.yml races.json; do
   if [ -f "$SRC/$f" ]; then cp "$SRC/$f" "_data/$f"; echo "synced $f"; else echo "missing $SRC/$f" >&2; fi
 done
