@@ -1,7 +1,7 @@
 # 顶部导航栏：只保留 Education 和 Projects。
 # children 显示成下拉菜单（鼠标移到 Education 上出现；手机宽度下收进右上角菜单，子项缩进列出）。
 # 点 Education 本身会到 /education/，它自动跳到 Module。
-# CV 页面仍在 /cv/，只是不放在导航里。
+# CV 已从网站移除（备份在私有仓库 site-data 的 cv/ 文件夹）。
 
 main:
   - title: "Education"
