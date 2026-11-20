@@ -35,7 +35,7 @@
   </div>
 </div>
 <script>
-  // 触屏设备没有"悬停"：第一次点 Education 只展开下拉（Module / Training / Experience），再点一次才进入；点页面其它地方收起
+  /* 触屏设备没有"悬停"：第一次点 Education 只展开下拉（Module / Training / Experience），再点一次才进入；点页面其它地方收起 */
   (function () {
     if (!window.matchMedia || !window.matchMedia('(hover: none)').matches) return;
     document.addEventListener('click', function (e) {
