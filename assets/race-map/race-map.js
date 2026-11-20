@@ -472,10 +472,12 @@
   var CENTERS = [{ lon: 0, en: '0°', zh: '0°' }, { lon: 60, en: '60°E', zh: '60°E' }, { lon: 150, en: '150°E', zh: '150°E' }];
   var ws = { lambda: 0, k: 1, ty: 0 };
   function drawWorld(token) {
-    return Promise.all([loadJSON('world')]).then(function (res) {
+    // world-lo.json is a simplified copy of world.json (same topology, fewer points) used while dragging/zooming.
+    return Promise.all([loadJSON('world'), loadJSON('world-lo').catch(function () { return null; })]).then(function (res) {
       if (token !== renderToken) return;
       showSvg(true);
       worldTopo = res[0];
+      var loTopo = res[1];
       var land = topojson.feature(worldTopo, worldTopo.objects.land);
       var provs = topojson.feature(worldTopo, worldTopo.objects.provinces).features;
       provs.forEach(function (f) { provNames[f.properties.prov] = f.properties; });
@@ -491,6 +493,17 @@
       Object.keys(byCC).forEach(function (cc) {
         units.push({ type: 'Feature', properties: { key: cc, cc: cc, top: topFor(cc), name: REG[cc] ? regionName(cc) : t('country.' + cc) }, geometry: topojson.merge(worldTopo, byCC[cc]) });
       });
+      // Low-detail geometry aligned with `units` (same order), drawn during gestures instead of the full-detail paths.
+      var landLo = null, unitsLo = null;
+      if (loTopo && loTopo.objects && loTopo.objects.provinces && loTopo.objects.provinces.geometries.length === pgeoms.length) {
+        landLo = topojson.feature(loTopo, loTopo.objects.land);
+        var provsLo = topojson.feature(loTopo, loTopo.objects.provinces).features, lgeoms = loTopo.objects.provinces.geometries, byCCLo = {};
+        unitsLo = [];
+        lgeoms.forEach(function (g) { var cc = g.properties.cc; if (inMacro(cc)) (byCCLo[cc] = byCCLo[cc] || []).push(g); });
+        provsLo.forEach(function (f) { if (!inMacro(f.properties.cc)) unitsLo.push(f.geometry); });
+        Object.keys(byCC).forEach(function (cc) { unitsLo.push(topojson.merge(loTopo, byCCLo[cc] || [])); });
+        if (unitsLo.length !== units.length) { landLo = null; unitsLo = null; }
+      }
       var topShape = {};
       function topGeom(top) {
         if (!topShape[top]) {
@@ -532,7 +545,13 @@
         .on('click', function (e, f) { go({ level: 'region', id: f.properties.top }); });
       // country-level overlays are only drawn in the country view
       var gHl = svg.append('path').attr('class', 'rm-hl');
-      function redraw() { gLand.attr('d', path(land)); gProv.attr('d', path); if (hoverTop) gHl.attr('d', path(topGeom(hoverTop))); }
+      // lo = true while a gesture or animation is running: draw the simplified geometry (same projection, fewer points).
+      function redraw(lo) {
+        var useLo = lo && unitsLo;
+        gLand.attr('d', path(useLo ? landLo : land));
+        gProv.attr('d', useLo ? function (f, i) { return path(unitsLo[i]); } : path);
+        if (hoverTop && !useLo) gHl.attr('d', path(topGeom(hoverTop)));
+      }
       redraw();
       // Drag left/right turns the globe (changes the central meridian); drag up/down pans; wheel or pinch zooms.
       var prev = d3.zoomIdentity, raf = 0;
@@ -553,9 +572,13 @@
           }
           ws.lambda = ((ws.lambda + 540) % 360) - 180;
           prev = t;
-          if (!raf) raf = requestAnimationFrame(function () { raf = 0; apply(); redraw(); syncCenters(); });
+          if (!raf) raf = requestAnimationFrame(function () { raf = 0; apply(); redraw(true); syncCenters(); });
         })
-        .on('end', function () { svgEl.classList.remove('is-dragging'); });
+        .on('end', function () {
+          svgEl.classList.remove('is-dragging');
+          if (raf) { cancelAnimationFrame(raf); raf = 0; }
+          apply(); redraw(false); syncCenters();
+        });
       svg.call(zoom).on('dblclick.zoom', null);
       svg.property('__zoom', d3.zoomIdentity.scale(ws.k)); prev = d3.zoomIdentity.scale(ws.k);
       // Controls: zoom buttons on the map, centre presets in the bar below it
@@ -570,7 +593,7 @@
           var from = ws.lambda, to = -(+btn.getAttribute('data-lon'));
           var d = ((to - from + 540) % 360) - 180;
           d3.transition().duration(500).tween('rotate', function () {
-            return function (tt) { ws.lambda = from + d * tt; apply(); redraw(); syncCenters(); };
+            return function (tt) { ws.lambda = from + d * tt; apply(); redraw(tt < 1); syncCenters(); };
           });
         });
       });
