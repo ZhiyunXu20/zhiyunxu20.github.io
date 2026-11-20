@@ -1,0 +1,33 @@
+# Projects 页的卡片数据（公开数据）。
+# 每个项目：
+#   course       课程代码小框（可选）：{code, url}，url 与 Module 页相同
+#   title        正标题
+#   name         项目名（可选，标题下方加粗一行）
+#   subtitle     副标题（可选，斜体）
+#   description  一句话简介（可选）
+#   links        按钮列表：icon 图标（Font Awesome 类名）、url 网址、label 文字说明
+#                show_label: true 时按钮显示文字，否则只显示图标（文字作为鼠标提示）
+#                url 留空 = 灰色占位按钮（暂时不能点）；以 / 开头的是站内链接（当前页打开），其它在新标签页打开
+#   hidden       true 则不显示
+
+- title: "Sport Event Map"
+  description: "An interactive map of my trail running, marathon and triathlon races."
+  links:
+    - {label: "My events", icon: "fa-solid fa-map-location-dot", url: "/projects/sport-event-map/", show_label: true}
+    - {label: "GitHub repository", icon: "fa-brands fa-github", url: "https://github.com/ZhiyunXu20/sport-event-map"}
+
+- title: "Honours Year Dissertation Project"
+  course: {code: "COMP390", url: "https://tulip.liv.ac.uk/mods/student/COMP390_202526.htm"}
+  name: "Exploring Attention Mechanisms in Transformers"
+  subtitle: "Attention Mechanism Variants in a Small-Scale Transformer for English–French Machine Translation: An Empirical, Controlled Implementation Study"
+  links:
+    - {label: "Report (coming soon)", icon: "fa-solid fa-file-lines", url: ""}
+    - {label: "GitHub repository", icon: "fa-brands fa-github", url: "https://github.com/ZhiyunXu20/COMP390_Transformer"}
+
+- title: "Group Software Project"
+  course: {code: "COMP208", url: "https://tulip.liv.ac.uk/mods/student/COMP208_202324.htm"}
+  name: "Unical"
+  description: "A calendar-based platform designed for students at the University of Liverpool."
+  links:
+    - {label: "Tool (coming soon)", icon: "fa-solid fa-screwdriver-wrench", url: ""}
+    - {label: "GitHub repository", icon: "fa-brands fa-github", url: "https://github.com/ZhiyunXu20/Unical"}

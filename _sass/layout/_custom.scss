@@ -47,3 +47,9 @@ a:visited {
     padding-right: 0;
   }
 }
+
+/* 顶部导航的"当前栏目"链接也保持可点（例如在 /projects/sport-event-map/ 页面点 Projects 能回到项目列表） */
+.masthead__menu-item.selected > a {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}

@@ -18,7 +18,10 @@
   .tr-count { margin-left: auto; opacity: .7; }
   .tr-cards { display: grid; grid-template-columns: 1fr; gap: 1em; }
   .tr-card { border: 1px solid var(--global-border-color, #ddd); border-radius: 8px; padding: .9em 1em; font-size: .85em; display: flex; flex-direction: column; gap: .35em; cursor: default; }
-  .tr-card.is-mapped { cursor: pointer; }
+  .tr-card.is-mapped { cursor: pointer; transition: border-color .15s, box-shadow .15s; }
+  .tr-card.is-mapped:hover { border-color: var(--global-link-color, #2f7f93); box-shadow: 0 1px 6px rgba(0,0,0,.08); }
+  .tr-card.is-mapped:focus-visible { outline: 2px solid var(--global-link-color, #2f7f93); outline-offset: 2px; }
+  .tr-pop-item.is-on a { font-weight: bold; }
   .tr-card.is-active { outline: 2px solid var(--global-link-color, #2f7f93); }
   .tr-card h3 { font-size: 1.05em; margin: 0; line-height: 1.3; }
   .tr-meta { opacity: .75; }
@@ -93,6 +96,16 @@
     document.getElementById('tr-map').hidden = true;
   }
 
+  /* 弹窗内容：列出该城市的所有条目；activeId 对应的那条加粗高亮 */
+  function popupHtml(list, activeId) {
+    var first = list[0];
+    return (first.city ? '<strong>' + esc(first.city) + '</strong>' : '') + '<ul style="margin:.3em 0 0 1em;padding:0">' +
+      list.map(function (p) {
+        var on = p.id === activeId;
+        return '<li class="tr-pop-item' + (on ? ' is-on' : '') + '"><a href="#" data-jump="' + esc(p.id) + '">' + esc(p.title) + '</a><br><span style="opacity:.7">' + esc(p.org) + ' · ' + esc(p.date) + '</span></li>';
+      }).join('') + '</ul>';
+  }
+
   function drawMarkers(visibleIds) {
     if (!layer) return [];
     layer.clearLayers(); markerAt = {};
@@ -104,11 +117,9 @@
     var bounds = [];
     Object.keys(groups).forEach(function (k) {
       var list = groups[k], first = list[0];
-      var html = (first.city ? '<strong>' + esc(first.city) + '</strong>' : '') + '<ul style="margin:.3em 0 0 1em;padding:0">' +
-        list.map(function (p) {
-          return '<li><a href="#" data-jump="' + esc(p.id) + '">' + esc(p.title) + '</a><br><span style="opacity:.7">' + esc(p.org) + ' · ' + esc(p.date) + '</span></li>';
-        }).join('') + '</ul>';
-      var m = L.marker([first.lat, first.lng], { title: list.map(function (p) { return p.title; }).join(' / ') }).bindPopup(html);
+      var m = L.marker([first.lat, first.lng], { title: list.map(function (p) { return p.title; }).join(' / ') }).bindPopup(popupHtml(list, null));
+      m._trList = list;
+      m.on('popupclose', function () { m.setPopupContent(popupHtml(list, null)); });
       m.addTo(layer); markerAt[k] = m; bounds.push([first.lat, first.lng]);
     });
     return bounds;
@@ -120,13 +131,27 @@
     if (!fly && card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
     var p = byId[id], m = p && markerAt[keyOf(p)];
     if (fly && m) {
-      map.setView(m.getLatLng(), Math.max(map.getZoom(), 5));
-      m.openPopup();
-      document.getElementById('tr-map').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      var mapEl = document.getElementById('tr-map'), r = mapEl.getBoundingClientRect();
+      if (r.top < 0 || r.bottom > window.innerHeight) mapEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      m.setPopupContent(popupHtml(m._trList, id));
+      map.flyTo(m.getLatLng(), Math.max(map.getZoom(), 9), { duration: 0.8 });
+      var opened = false;
+      var openIt = function () { if (!opened) { opened = true; m.openPopup(); } };
+      map.once('moveend', openIt);
+      setTimeout(openIt, 1200); /* 动画被浏览器暂停时也保证弹窗打开 */
     }
   }
+  /* 点卡片（链接以外的地方）或在卡片上按 Enter / 空格：地图飞到该培训所在城市并打开弹窗；没有坐标的卡片不响应 */
   cards.forEach(function (c) {
-    if (byId[c.dataset.id]) c.addEventListener('click', function (e) { if (e.target.tagName !== 'A') highlight(c.dataset.id, true); });
+    if (!byId[c.dataset.id]) return;
+    c.setAttribute('tabindex', '0');
+    c.setAttribute('role', 'button');
+    c.setAttribute('aria-label', 'Show ' + (byId[c.dataset.id].title || '') + ' on the map');
+    c.addEventListener('click', function (e) { if (!e.target.closest('a')) highlight(c.dataset.id, true); });
+    c.addEventListener('keydown', function (e) {
+      if (e.target !== c) return;
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); highlight(c.dataset.id, true); }
+    });
   });
 
   /* ---- filters ---- */
@@ -166,16 +191,6 @@
     });
     modeButtons.push(b); gMode.appendChild(b);
   });
-  var gSeason = group('Season:');
-  var seasonButtons = [];
-  ['winter', 'summer', 'spring'].filter(function (s) { return seasons[s]; }).forEach(function (s) {
-    var b = chip(s, false, function () {
-      state.season = state.season === s ? null : s;
-      seasonButtons.forEach(function (x) { x.setAttribute('aria-pressed', x.textContent === state.season ? 'true' : 'false'); });
-      apply();
-    });
-    seasonButtons.push(b); gSeason.appendChild(b);
-  });
   var count = document.createElement('span'); count.className = 'tr-count'; bar.appendChild(count);
 
   function apply() {
@@ -183,7 +198,7 @@
     var shown = 0, visibleIds = [];
     cards.forEach(function (c) {
       var ct = (c.dataset.tags || '').split(',');
-      var ok = active.every(function (t) { return ct.indexOf(t) !== -1; }) && (!state.mode || c.dataset.mode === state.mode) && (!state.season || c.dataset.season === state.season);
+      var ok = active.every(function (t) { return ct.indexOf(t) !== -1; }) && (!state.mode || c.dataset.mode === state.mode);
       c.hidden = !ok;
       if (ok) { shown++; visibleIds.push(c.dataset.id); }
     });
