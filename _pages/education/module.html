@@ -10,6 +10,8 @@ redirect_from:
   课程：数据来自 _data/modules.yml（公开数据）。
   结构：学校（二级标题，下面每行一个学院链接）→ 学年（点击展开，默认收起）→ 一张表格（Code | Module）；有名字的分组（如院系）在表格内显示为一整行。
   url 有值时 Code 显示为链接；note / note_url 显示为课程名后的括号说明；hidden: true 的课程不显示。
+  课程文件：files 列表 [{type, url, label(可选)}]，按类型在课程名后显示小图标（新标签页打开），悬停显示小字提示；
+  类型 → 图标 / 悬停文字 在 _data/file_types.yml 定义。
 {% endcomment %}
 {% assign schools = site.data.modules | default: empty %}
 
@@ -26,8 +28,7 @@ redirect_from:
   .md-body tr.md-group td { font-weight: bold; padding-top: .8em; border-bottom: 1px solid var(--global-border-color, #ddd); }
   .md-body table { width: 100%; display: table; font-size: .85em; margin: 0 0 .6em; background: transparent; }
   .md-body th, .md-body td { padding: .35em .6em; text-align: left; }
-  .md-body .md-code { width: 8.5em; white-space: nowrap; }
-</style>
+  .md-body .md-code { width: 8.5em; white-space: nowrap; }</style>
 
 {% for school in schools %}
 <h2 class="md-school">{{ school.school }}</h2>
@@ -42,7 +43,7 @@ redirect_from:
 {% for g in se.groups %}
 {% assign mods = g.modules | default: empty | where_exp: "m", "m.hidden != true" %}
 {% if g.group and g.group != "" %}<tr class="md-group"><td colspan="2">{% if g.url and g.url != "" %}<a href="{{ g.url }}" target="_blank" rel="noopener">{{ g.group }}</a>{% else %}{{ g.group }}{% endif %}</td></tr>{% endif %}
-{% for m in mods %}<tr><td class="md-code">{% if m.url and m.url != "" %}<a href="{{ m.url }}" target="_blank" rel="noopener">{{ m.code }}</a>{% else %}{{ m.code }}{% endif %}</td><td>{{ m.name }}{% if m.note and m.note != "" %} ({% if m.note_url and m.note_url != "" %}<a href="{{ m.note_url }}" target="_blank" rel="noopener">{{ m.note }}</a>{% else %}{{ m.note }}{% endif %}){% endif %}</td></tr>
+{% for m in mods %}<tr><td class="md-code">{% if m.url and m.url != "" %}<a href="{{ m.url }}" target="_blank" rel="noopener">{{ m.code }}</a>{% else %}{{ m.code }}{% endif %}</td><td>{{ m.name }}{% if m.note and m.note != "" %} ({% if m.note_url and m.note_url != "" %}<a href="{{ m.note_url }}" target="_blank" rel="noopener">{{ m.note }}</a>{% else %}{{ m.note }}{% endif %}){% endif %}{% for f in m.files %}{% if f.url and f.url != "" %}{% assign ft = site.data.file_types[f.type] %}{% assign ficon = ft.icon | default: "fa-solid fa-paperclip" %}{% assign flabel = f.label | default: ft.label | default: "File" %}<a class="module-file" href="{{ f.url }}" target="_blank" rel="noopener" data-tip="{{ flabel }}" aria-label="{{ m.code }} {{ flabel }}"><i class="{{ ficon }}" aria-hidden="true"></i></a>{% endif %}{% endfor %}</td></tr>
 {% endfor %}
 {% endfor %}
 </tbody>
