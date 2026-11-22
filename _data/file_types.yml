@@ -1,0 +1,4 @@
+# Module 页课程文件的类型：图标（Font Awesome 类名）和悬停时显示的文字。
+# 在 _data/modules.yml 的课程里写 files: [{type: handbook, url: "…"}] 即可；新类型在这里加一行。
+handbook: {icon: "fa-solid fa-book-open", label: "Module handbook"}
+report: {icon: "fa-solid fa-file-lines", label: "Report"}

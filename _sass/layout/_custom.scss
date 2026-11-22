@@ -53,3 +53,43 @@ a:visited {
   pointer-events: auto !important;
   cursor: pointer !important;
 }
+
+/* Module 页：课程名后的文件小图标（handbook 等），悬停时在图标上方显示小字提示 */
+.module-file {
+  position: relative;
+  display: inline-block;
+  margin-left: 0.4em;
+  font-size: 0.9em;
+  color: var(--global-link-color);
+
+  &:hover {
+    color: var(--global-link-color-hover);
+  }
+
+  &::after {
+    content: attr(data-tip);
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 6px);
+    transform: translateX(-50%);
+    padding: 0.2em 0.55em;
+    border-radius: 4px;
+    background: #333;
+    color: #fff;
+    font-size: 0.7em;
+    font-weight: normal;
+    line-height: 1.4;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease-in;
+    z-index: 10;
+  }
+
+  @media (hover: hover) {
+    &:hover::after,
+    &:focus-visible::after {
+      opacity: 1;
+    }
+  }
+}
