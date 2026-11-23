@@ -26,8 +26,8 @@
 
 - title: "Group Software Project"
   course: {code: "COMP208", url: "https://tulip.liv.ac.uk/mods/student/COMP208_202324.htm"}
-  name: "Unical"
-  description: "A calendar-based platform designed for students at the University of Liverpool."
+  name: "Unical (University Calendar)"
+  description: "Converts a saved University of Liverpool or XJTLU timetable page (HTML) into an .ics calendar file for Outlook, Google Calendar or Apple Calendar. Runs entirely in your browser."
   links:
-    - {label: "Tool (coming soon)", icon: "fa-solid fa-screwdriver-wrench", url: ""}
+    - {label: "Timetable to Calendar tool", icon: "fa-solid fa-screwdriver-wrench", url: "/projects/unical/"}
     - {label: "GitHub repository", icon: "fa-brands fa-github", url: "https://github.com/ZhiyunXu20/Unical"}
